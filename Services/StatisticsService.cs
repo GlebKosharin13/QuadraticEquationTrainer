@@ -40,46 +40,5 @@ namespace QuadraticEquationTrainer.Services
             _wrongAnswers++;
             _errors.Add($"Уравнение: {equation} | Ваш ответ: {userAnswer} | Правильный: {correctAnswer}");
         }
-
-        /// <summary>
-        /// Возвращает отчёт о статистике в виде строки
-        /// </summary>
-        public string GetStatisticsReport()
-        {
-            var sb = new StringBuilder();
-            sb.AppendLine("📊 Статистика:");
-            sb.AppendLine($"Всего попыток: {_totalAttempts}");
-            sb.AppendLine($"✅ Верно: {_correctAnswers}");
-            sb.AppendLine($"❌ Ошибок: {_wrongAnswers}");
-
-            if (_totalAttempts > 0)
-            {
-                double percent = (double)_correctAnswers / _totalAttempts * 100;
-                sb.AppendLine($"Процент верных ответов: {percent:F1}%");
-            }
-
-            if (_errors.Count > 0)
-            {
-                sb.AppendLine($"\nПоследние ошибки (последние 5):");
-                int start = Math.Max(0, _errors.Count - 5);
-                for (int i = start; i < _errors.Count; i++)
-                {
-                    sb.AppendLine($"  - {_errors[i]}");
-                }
-            }
-
-            return sb.ToString();
-        }
-
-        /// <summary>
-        /// Сбрасывает статистику
-        /// </summary>
-        public void Reset()
-        {
-            _totalAttempts = 0;
-            _correctAnswers = 0;
-            _wrongAnswers = 0;
-            _errors.Clear();
-        }
     }
 }

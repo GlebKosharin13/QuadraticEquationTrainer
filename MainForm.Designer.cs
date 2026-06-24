@@ -38,6 +38,7 @@
             btnNew = new Button();
             txtSolution = new TextBox();
             lblStats = new Label();
+            btnNoRoots = new Button();
             SuspendLayout();
             // 
             // lblEquation
@@ -143,7 +144,7 @@
             // 
             txtSolution.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             txtSolution.BackColor = SystemColors.Info;
-            txtSolution.Font = new Font("Segoe UI", 10F);
+            txtSolution.Font = new Font("Segoe UI", 12F);
             txtSolution.Location = new Point(67, 424);
             txtSolution.Multiline = true;
             txtSolution.Name = "txtSolution";
@@ -165,11 +166,26 @@
             lblStats.Text = "Всего уравнений: 0 (верно: 0, неверно: 0)";
             lblStats.TextAlign = ContentAlignment.MiddleLeft;
             // 
+            // btnNoRoots
+            // 
+            btnNoRoots.Anchor = AnchorStyles.Top;
+            btnNoRoots.Enabled = false;
+            btnNoRoots.Font = new Font("Segoe UI", 14.25F);
+            btnNoRoots.Location = new Point(645, 112);
+            btnNoRoots.Name = "btnNoRoots";
+            btnNoRoots.Size = new Size(140, 35);
+            btnNoRoots.TabIndex = 9;
+            btnNoRoots.Text = "Корней нет";
+            btnNoRoots.UseVisualStyleBackColor = true;
+            btnNoRoots.Visible = false;
+            btnNoRoots.Click += btnNoRoots_Click;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1008, 819);
+            Controls.Add(btnNoRoots);
             Controls.Add(lblStats);
             Controls.Add(txtSolution);
             Controls.Add(btnNew);
@@ -198,5 +214,6 @@
         private Button btnNew;
         private TextBox txtSolution;
         private Label lblStats;
+        private Button btnNoRoots;
     }
 }

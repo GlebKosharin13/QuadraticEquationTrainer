@@ -14,7 +14,7 @@ namespace QuadraticEquationTrainer
         private QuadraticEquation _currentEquation;
         private double _root1;
         private double _root2;
-
+        private bool _isAnswered = false;
         public MainForm()
         {
             InitializeComponent();
@@ -40,7 +40,8 @@ namespace QuadraticEquationTrainer
             btnShowSolution.Visible = false;
             txtSolution.Visible = false;
             lblStats.Visible = false;
-
+            btnNoRoots.Visible = false;
+            btnNoRoots.Enabled = false;
             // Кнопка "Новое уравнение" активна
             btnNew.Enabled = true;
         }
@@ -59,36 +60,54 @@ namespace QuadraticEquationTrainer
             // Показываем уравнение на форме
             lblEquation.Text = _currentEquation.ToString();
 
-            // Показываем все элементы управления
-            lblX1Label.Visible = true;
-            lblX2Label.Visible = true;
+            // === ВСЕ ЭЛЕМЕНТЫ ВСЕГДА ВИДИМЫ И АКТИВНЫ ===
+            // Поля ввода
             txtX1.Visible = true;
             txtX2.Visible = true;
+            lblX1Label.Visible = true;
+            lblX2Label.Visible = true;
+            txtX1.Enabled = true;
+            txtX2.Enabled = true;
+
+            // Кнопки проверки и решения
             btnCheck.Visible = true;
             btnShowSolution.Visible = true;
+            btnCheck.Enabled = true;
+            btnShowSolution.Enabled = true;
+
+            // Кнопка "Нет корней!" — всегда видна и активна
+            btnNoRoots.Visible = true;
+            btnNoRoots.Enabled = true;
+
+            // Поле для решения и статистика
             txtSolution.Visible = true;
+            txtSolution.Clear();
             lblStats.Visible = true;
 
-            // Очищаем поля ввода и решение
+            // === ОБЩИЕ ДЕЙСТВИЯ ===
+            // Очищаем поля ввода
             txtX1.Clear();
             txtX2.Clear();
             txtSolution.Clear();
 
-            // Активируем поля ввода и кнопки
-            txtX1.Enabled = true;
-            txtX2.Enabled = true;
-            btnCheck.Enabled = true;
-            btnShowSolution.Enabled = true;
+            // Сбрасываем цвет полей
+            txtX1.BackColor = SystemColors.Window;
+            txtX2.BackColor = SystemColors.Window;
 
-            // Блокируем кнопку "Новое уравнение" пока не решат или не посмотрят решение
+            // Сбрасываем флаг ответа
+            _isAnswered = false;
+
+            // === НОВОЕ УРАВНЕНИЕ — РЕШЕНИЕ НЕДОСТУПНО ===
+            btnShowSolution.Enabled = false;
+
+            // Блокируем кнопку "Новое уравнение" (пока не решат или не посмотрят решение)
             btnNew.Enabled = false;
 
             // Устанавливаем фокус на первое поле
             txtX1.Focus();
 
-            // Сбрасываем цвет полей (если были подсвечены)
-            txtX1.BackColor = SystemColors.Window;
-            txtX2.BackColor = SystemColors.Window;
+            // Обновляем статистику
+            UpdateStatisticsDisplay();
         }
 
         /// <summary>
@@ -96,6 +115,13 @@ namespace QuadraticEquationTrainer
         /// </summary>
         private void btnCheck_Click(object sender, EventArgs e)
         {
+            if (_isAnswered)
+            {
+                MessageBox.Show("Это уравнение уже решено! Нажмите «Новое уравнение» для продолжения.",
+                    "Информация", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
             // Проверяем, что поля не пустые
             if (string.IsNullOrWhiteSpace(txtX1.Text) || string.IsNullOrWhiteSpace(txtX2.Text))
             {
@@ -106,7 +132,7 @@ namespace QuadraticEquationTrainer
             // Пытаемся преобразовать введённые значения в числа
             if (!double.TryParse(txtX1.Text, out double userX1) || !double.TryParse(txtX2.Text, out double userX2))
             {
-                MessageBox.Show("Введите корректные значения (числа)!", "Ошибка!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Введите корректные значения!", "Ошибка!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -114,24 +140,19 @@ namespace QuadraticEquationTrainer
             bool isCorrect = (Math.Abs(userX1 - _root1) < 0.001 && Math.Abs(userX2 - _root2) < 0.001) ||
                              (Math.Abs(userX1 - _root2) < 0.001 && Math.Abs(userX2 - _root1) < 0.001);
 
+            // === ПОСЛЕ ПРОВЕРКИ — ФИКСИРУЕМ, ЧТО ОТВЕТ ДАН ===
+            _isAnswered = true;
+
             if (isCorrect)
             {
                 // Правильный ответ
                 _statistics.RegisterSuccess();
-                MessageBox.Show("Правильный ответ!", "Успех!", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Правильный ответ!", "Верно!", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 // Подсвечиваем поля зелёным
                 txtX1.BackColor = Color.LightGreen;
                 txtX2.BackColor = Color.LightGreen;
-
-                // Блокируем поля и кнопки
-                txtX1.Enabled = false;
-                txtX2.Enabled = false;
-                btnCheck.Enabled = false;
-                btnShowSolution.Enabled = false;
-
-                // Разблокируем кнопку "Новое уравнение"
-                btnNew.Enabled = true;
+                
             }
             else
             {
@@ -140,26 +161,100 @@ namespace QuadraticEquationTrainer
                 string userAnswer = $"x₁ = {userX1:F2}, x₂ = {userX2:F2}";
                 _statistics.RegisterFail(_currentEquation.ToString(), userAnswer, correctAnswer);
 
-                MessageBox.Show($"Неправильно. Попробуйте ещё раз!",
-                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show($"Неверный ответ!",
+                    "Ошибка!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 
                 // Подсвечиваем поля красным
                 txtX1.BackColor = Color.LightCoral;
                 txtX2.BackColor = Color.LightCoral;
+            }
 
-                // Поля остаются активными для исправления
-                txtX1.Enabled = true;
-                txtX2.Enabled = true;
-                btnCheck.Enabled = true;
+            txtX1.Enabled = false;
+            txtX2.Enabled = false;
+            btnCheck.Enabled = false;
+            btnNew.Enabled = true;
+            btnShowSolution.Enabled = true;
+            btnNoRoots.Enabled = false;
+
+            // Обновляем статистику
+            UpdateStatisticsDisplay();
+        }
+
+        private void btnNoRoots_Click(object sender, EventArgs e)
+        {
+            // === ПРОВЕРКА: уже решено? ===
+            if (_isAnswered)
+            {
+                MessageBox.Show("Это уравнение уже решено! Нажмите «Новое уравнение» для продолжения.",
+                    "Информация!", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            // === ПРОВЕРКА: есть ли уравнение? ===
+            if (_currentEquation == null)
+            {
+                MessageBox.Show("Сначала сгенерируйте уравнение!", "Внимание!",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // === ПРОВЕРКА: действительно ли нет корней? ===
+            var roots = _currentEquation.GetRoots();
+            bool hasRoots = roots.x1.HasValue;
+
+            // === ФИКСИРУЕМ, ЧТО ОТВЕТ ДАН ===
+            _isAnswered = true;
+
+            if (!hasRoots)
+            {
+                // ✅ Правильно! Корней действительно нет
+                _statistics.RegisterSuccess();
+                MessageBox.Show("Правильно! Корней действительно нет!",
+                    "Верно!", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                // Блокируем кнопку "Нет корней!"
+                btnNoRoots.Enabled = false;
+                btnNoRoots.BackColor = SystemColors.Control;
+
+                // Блокируем поля ввода и кнопки
+                txtX1.Enabled = false;
+                txtX2.Enabled = false;
+                btnCheck.Enabled = false;
                 btnShowSolution.Enabled = true;
 
-                // Кнопка "Новое уравнение" остаётся заблокированной
-                btnNew.Enabled = false;
+                // Разблокируем кнопку "Новое уравнение"
+                btnNew.Enabled = true;
+            }
+            else
+            {
+                // неверно, корни есть
+                _statistics.RegisterFail(
+                    _currentEquation.ToString(),
+                    "Нет корней (неправильно)",
+                    FormatRoot(_root1, _root2)
+                );
+
+                MessageBox.Show($"Неверно, у этого уравнения есть корни!",
+                    "Ошибка!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+                // Блокируем кнопку "Нет корней!" (чтобы нельзя было нажать повторно)
+                btnNoRoots.Enabled = false;
+                btnNoRoots.BackColor = SystemColors.Control;
+
+                // Поля ввода и кнопки блокируются
+                txtX1.Enabled = false;
+                txtX2.Enabled = false;
+                btnCheck.Enabled = false;
+                btnShowSolution.Enabled = true;
+
+                // Разблокируем кнопку "Новое уравнение"
+                btnNew.Enabled = true;
             }
 
             // Обновляем статистику
             UpdateStatisticsDisplay();
         }
+
 
         /// <summary>
         /// Обработчик кнопки "Показать решение"
@@ -168,7 +263,7 @@ namespace QuadraticEquationTrainer
         {
             if (_currentEquation == null)
             {
-                MessageBox.Show("Сначала сгенерируйте уравнение!", "Внимание",
+                MessageBox.Show("Сначала сгенерируйте уравнение!", "Внимание!",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
@@ -183,6 +278,7 @@ namespace QuadraticEquationTrainer
             // Отключаем кнопки проверки и решения
             btnCheck.Enabled = false;
             btnShowSolution.Enabled = false;
+            btnNoRoots.Enabled= false;
 
             // Разблокируем кнопку "Новое уравнение"
             btnNew.Enabled = true;

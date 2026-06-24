@@ -1,7 +1,6 @@
 ﻿using System;
 using QuadraticEquationTrainer.Models;
 
-
 namespace QuadraticEquationTrainer.Services
 {
     /// <summary>
@@ -11,7 +10,7 @@ namespace QuadraticEquationTrainer.Services
     {
         private readonly Random _random = new Random();
 
-        // Вероятность генерации уравнения без корней (0.2 = 20%)
+        // Вероятность генерации уравнения без корней (20%)
         private const double NoRootsProbability = 0.2;
 
         /// <summary>
@@ -20,38 +19,46 @@ namespace QuadraticEquationTrainer.Services
         /// <returns>Объект QuadraticEquation</returns>
         public QuadraticEquation Generate()
         {
-            Random random = new Random();
+            // Сначала решаем: будут корни или нет?
+            bool shouldHaveRoots = _random.NextDouble() >= NoRootsProbability;
 
             while (true)
             {
                 // Генерируем целые коэффициенты
-                int a = random.Next(1, 6);      // a от 1 до 5
-                int b = random.Next(-10, 11);   // b от -10 до 10
-                int c = random.Next(-10, 11);   // c от -10 до 10
+                int a = _random.Next(1, 6);      // a от 1 до 5
+                int b = _random.Next(-10, 11);   // b от -10 до 10
+                int c = _random.Next(-10, 11);   // c от -10 до 10
 
                 double discriminant = b * b - 4 * a * c;
 
-                // Пропускаем уравнения без корней
-                if (discriminant < 0)
-                    continue;
-
-                // Проверяем, что дискриминант — полный квадрат
-                double sqrtD = Math.Sqrt(discriminant);
-                if (Math.Abs(sqrtD - Math.Round(sqrtD)) > 0.0001)
-                    continue;
-
-                // Проверяем, что корни делятся нацело на 2a
-                double x1 = (-b - sqrtD) / (2 * a);
-                double x2 = (-b + sqrtD) / (2 * a);
-
-                // Проверяем, что корни — конечные десятичные дроби (не более 1 знака)
-                if (IsFiniteDecimal(x1) && IsFiniteDecimal(x2))
+                if (shouldHaveRoots)
                 {
-                    // С вероятностью 0.2 генерируем уравнение без корней
-                    if (random.NextDouble() < 0.2)
-                        continue; // пропускаем, чтобы получить без корней
+                    // === НУЖНЫ КОРНИ ===
+                    // Проверяем, что дискриминант >= 0
+                    if (discriminant < 0)
+                        continue;
 
-                    return new QuadraticEquation(a, b, c);
+                    // Проверяем, что дискриминант — полный квадрат
+                    double sqrtD = Math.Sqrt(discriminant);
+                    if (Math.Abs(sqrtD - Math.Round(sqrtD)) > 0.00001)
+                        continue;
+
+                    // Проверяем, что корни — конечные десятичные дроби (не более 1 знака)
+                    double x1 = (-b - sqrtD) / (2 * a);
+                    double x2 = (-b + sqrtD) / (2 * a);
+
+                    if (IsFiniteDecimal(x1) && IsFiniteDecimal(x2))
+                    {
+                        return new QuadraticEquation(a, b, c);
+                    }
+                }
+                else
+                {
+                    // === НУЖНЫ УРАВНЕНИЯ БЕЗ КОРНЕЙ ===
+                    if (discriminant < 0)
+                    {
+                        return new QuadraticEquation(a, b, c);
+                    }
                 }
             }
         }
