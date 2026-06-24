@@ -132,8 +132,7 @@ namespace QuadraticEquationTrainer.Models
             string x1Str = FormatNumberForDisplay(x1);
             string x2Str = FormatNumberForDisplay(x2);
 
-            result += "2. D > 0, следовательно, уравнение имеет два корня:" + Environment.NewLine;
-            result += $"   √D = {sqrtDStr}" + Environment.NewLine + Environment.NewLine;
+            result += $"2. D > 0,  √D = {sqrtDStr}, следовательно, уравнение имеет два корня." + Environment.NewLine + Environment.NewLine;
             result += "3. Находим корни:" + Environment.NewLine;
             result += $"   x₁ = (-b - √D) / (2a) = ({negB} - {sqrtDStr}) / {2 * _a} = {x1Str}" + Environment.NewLine;
             result += $"   x₂ = (-b + √D) / (2a) = ({negB} + {sqrtDStr}) / {2 * _a} = {x2Str}" + Environment.NewLine + Environment.NewLine;
