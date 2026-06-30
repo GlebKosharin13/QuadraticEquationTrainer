@@ -12,12 +12,10 @@ namespace QuadraticEquationTrainer.Services
         private int _totalAttempts = 0;
         private int _correctAnswers = 0;
         private int _wrongAnswers = 0;
-        private readonly List<string> _errors = new List<string>();
 
         public int TotalAttempts => _totalAttempts;
         public int CorrectAnswers => _correctAnswers;
         public int WrongAnswers => _wrongAnswers;
-        public IReadOnlyList<string> Errors => _errors.AsReadOnly();
 
         /// <summary>
         /// Регистрирует правильный ответ
@@ -31,14 +29,10 @@ namespace QuadraticEquationTrainer.Services
         /// <summary>
         /// Регистрирует неправильный ответ
         /// </summary>
-        /// <param name="equation">Уравнение</param>
-        /// <param name="userAnswer">Ответ пользователя</param>
-        /// <param name="correctAnswer">Правильный ответ</param>
-        public void RegisterFail(string equation, string userAnswer, string correctAnswer)
+        public void RegisterFail()
         {
             _totalAttempts++;
             _wrongAnswers++;
-            _errors.Add($"Уравнение: {equation} | Ваш ответ: {userAnswer} | Правильный: {correctAnswer}");
         }
     }
 }
